@@ -5789,6 +5789,12 @@ static int sde_crtc_onscreenfinger_atomic_check(struct sde_crtc_state *cstate,
 		cpu_input_boost_kick_max(500);
 		devfreq_boost_kick_max(DEVFREQ_MSM_LLCCBW_DDR, 500);
 		devfreq_boost_kick_max(DEVFREQ_MSM_CPU_LLCCBW, 500);
+		cstate->fingerprint_pressed = true;
+		return 0;
+	} else {
+		cstate->fingerprint_pressed = false;
+		cstate->fingerprint_dim_layer = NULL;
+		return 0;
 	}
 
 	if(aod_index <0){
