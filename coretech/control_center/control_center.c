@@ -628,8 +628,10 @@ static void cc_adjust_ddr_lock_freq(struct cc_command *cc)
 
 static void cc_adjust_sched(struct cc_command *cc)
 {
+#ifdef CONFIG_OPCHAIN
 	struct task_struct *task = NULL;
 	pid_t pid = cc->params[0];
+#endif
 
 	if (cc_is_nonblock(cc))
 		return;
