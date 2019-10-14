@@ -7483,8 +7483,7 @@ enum fastpaths {
 };
 
 static inline int find_best_target(struct task_struct *p, int *backup_cpu,
-				   bool boosted, bool sync_boost,
-				   bool prefer_idle,
+				   bool boosted, bool sync_boost, bool prefer_idle,
 				   struct find_best_target_env *fbt_env)
 {
 	unsigned long min_util = boosted_task_util(p);
@@ -8194,6 +8193,7 @@ static int find_energy_efficient_cpu(struct sched_domain *sd,
 				     int sync, bool sync_boost)
 {
 	int use_fbt = sched_feat(FIND_BEST_TARGET);
+	int use_sync_boost = sched_feat(SYNC_BOOST);
 	int cpu_iter, eas_cpu_idx = EAS_CPU_NXT;
 	int delta = 0;
 	int target_cpu = -1;
@@ -8205,6 +8205,7 @@ static int find_energy_efficient_cpu(struct sched_domain *sd,
 	u64 start_t = 0;
 	int next_cpu = -1, backup_cpu = -1;
 	int boosted = (schedtune_task_boost(p) > 0);
+	bool sync_boost = false;
 
 	fbt_env.fastpath = 0;
 
@@ -8219,6 +8220,12 @@ static int find_energy_efficient_cpu(struct sched_domain *sd,
 		target_cpu = cpu;
 		fbt_env.fastpath = SYNC_WAKEUP;
 		goto out;
+	}
+
+	if (use_sync_boost) {
+		sync_boost = sync && cpu >= cpu_rq(cpu)->rd->mid_cap_orig_cpu;
+	} else {
+		sync_boost = false;
 	}
 
 	/* prepopulate energy diff environment */
@@ -8328,8 +8335,8 @@ out:
 
 	trace_sched_task_util(p, next_cpu, backup_cpu, target_cpu, sync,
 			need_idle, fbt_env.fastpath, placement_boost,
-			rtg_target ? cpumask_first(rtg_target) : -1,
-			start_t, boosted);
+			rtg_target ? cpumask_first(rtg_target) : -1, start_t,
+			boosted, sync_boost);
 	return target_cpu;
 }
 
