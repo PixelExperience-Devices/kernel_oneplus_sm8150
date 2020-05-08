@@ -507,8 +507,8 @@ static int calibrate_data_read_func(struct seq_file *s, void *v)
     if (!sec_ops->calibration_data)
         return 0;
 
-	if (ts->is_suspended)
-		return 0;
+    if (ts->is_suspended)
+        return 0;
     disable_irq_nosync(ts->irq);
     mutex_lock(&ts->mutex);
     if (!ts->touch_count) {

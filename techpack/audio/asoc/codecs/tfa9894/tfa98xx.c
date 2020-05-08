@@ -1878,8 +1878,10 @@ static void tfa98xx_add_widgets(struct tfa98xx *tfa98xx)
 			sizeof(struct snd_soc_dapm_widget) *
 				ARRAY_SIZE(tfa98xx_dapm_widgets_common),
 			GFP_KERNEL);
+
 	if (!widgets)
 		return;
+
 	memcpy(widgets, tfa98xx_dapm_widgets_common,
 			sizeof(struct snd_soc_dapm_widget) *
 				ARRAY_SIZE(tfa98xx_dapm_widgets_common));
