@@ -312,7 +312,7 @@ static bool cache_is_low(void)
 	unsigned long cache =
 		global_node_page_state(NR_FILE_PAGES) - total_swapcache_pages();
 
-	if (cache < get_max_minfree())
+	if (cache < 0)
 		return true;
 
 	return false;
@@ -400,7 +400,7 @@ static int suitable_reclaim_check(struct lruvec *lruvec)
 	unsigned long inactive = global_zone_page_state(NR_ZONE_INACTIVE_FILE);
 	unsigned long total_uid_lru_nr = uid_lru_size();
 
-	if ((active + inactive) > get_max_minfree())
+	if ((active + inactive) > 0 )
 		return ((active + inactive) << 3) < total_uid_lru_nr;
 	else
 		return SMART_BOOST_PUTBACK_LRU;
