@@ -37,11 +37,6 @@
 #include "sde_crtc.h"
 #include "sde_rm.h"
 #include "sde_trace.h"
-
-#ifdef CONFIG_KLAPSE
-#include <linux/klapse.h>
-#endif
-
 /**
  * topology is currently defined by a set of following 3 values:
  * 1. num of layer mixers
@@ -917,10 +912,6 @@ static int dsi_panel_update_backlight(struct dsi_panel *panel,
 		pr_debug("HBM is enabled\n");
 		return 0;
 	}
-	
-#ifdef CONFIG_KLAPSE
-	set_rgb_slider(bl_lvl);
-#endif
 
 	/*** DC backlight config ****/
 	if (op_dimlayer_bl_enabled != op_dimlayer_bl_enable_real) {
