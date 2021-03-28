@@ -713,7 +713,6 @@ void ht_collect_perf_data(struct work_struct *work)
 		 * 3. enter frequency not higher than threshold
 		 */
 		if (parcel.queued_ts_us - rtg_task->rtg_ts >= 1000000 /* 1 sec */ ||
-				rtg_task->ravg.demand_scaled < base_util ||
 				rtg_task->rtg_peak < rtg_filter_cnt) {
 			list_del_init(&rtg_task->rtg_node);
 			continue;
@@ -1934,9 +1933,8 @@ void ht_rtg_list_add_tail(struct task_struct *task)
 		return;
 
 	ht_logv("rtg task add list: %s(%d) util: %d, peak: %d\n",
-		task->comm, task->pid, task->ravg.demand_scaled, task->rtg_peak);
+		task->comm, task->pid, 0, task->rtg_peak);
 
-	if (task->ravg.demand_scaled < base_util)
 		return;
 
 	time = ktime_to_us(ktime_get());
@@ -1975,7 +1973,7 @@ void ht_rtg_list_del(struct task_struct *task)
 	spin_lock(&ht_rtg_lock);
 	if (!list_empty(&task->rtg_node)) {
 		ht_logv("rtg task del list: %s(%d) util: %d, peak: %d\n",
-			task->comm, task->pid, task->ravg.demand_scaled, task->rtg_peak);
+			task->comm, task->pid, 0, task->rtg_peak);
 		list_del_init(&task->rtg_node);
 	}
 	spin_unlock(&ht_rtg_lock);
@@ -1994,7 +1992,7 @@ static int rtg_dump_show(char *buf, const struct kernel_param *kp)
 	cnt += snprintf(buf + cnt, PAGE_SIZE - cnt, "RTG list: comm, pid, util, peak, cnt, delta ts, ts\n");
 	list_for_each_entry(t, &ht_rtg_head, rtg_node) {
 		cnt += snprintf(buf + cnt, PAGE_SIZE - cnt, "%s %d %lu %u %u %lld %lld\n",
-				t->comm, t->pid, t->ravg.demand_scaled,
+				t->comm, t->pid, 0,
 				t->rtg_peak, t->rtg_cnt,
 				time - t->rtg_ts, t->rtg_ts);
 		++size;
@@ -2030,10 +2028,10 @@ static int get_util(bool isRender, int *num)
 	if (!isRender) {
 		spin_lock(&ht_rtg_lock);
 		list_for_each_entry(t, &ht_rtg_head, rtg_node) {
-			util += t->ravg.demand_scaled;
+			util += 0;
 			(*num)++;
 			ht_logv("RTG: comm:%s pid:%d util:%lu\n",
-					t->comm, t->pid, t->ravg.demand_scaled);
+					t->comm, t->pid, 0);
 		}
 		spin_unlock(&ht_rtg_lock);
 	} else {
@@ -2042,9 +2040,9 @@ static int get_util(bool isRender, int *num)
 				ht_perf_event_node) {
 			if (RenPid != t->pid)
 				continue;
-			util = t->ravg.demand_scaled;
+			util = 0;
 			ht_logv("Render: comm:%s pid:%d util:%lu\n",
-					t->comm, t->pid, t->ravg.demand_scaled);
+					t->comm, t->pid, 0);
 			break;
 		}
 		spin_unlock(&ht_perf_event_lock);
